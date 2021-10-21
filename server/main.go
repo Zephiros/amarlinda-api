@@ -1,8 +1,8 @@
 package main
 
 import (
-    "github.com/Zephiros/amarlinda-back/database"
-    "github.com/Zephiros/amarlinda-back/routes"
+    "github.com/Zephiros/amarlinda/database"
+    "github.com/Zephiros/amarlinda/routes"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/cors"
 )

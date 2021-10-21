@@ -1,7 +1,7 @@
 package routes
 
 import (
-    "github.com/Zephiros/amarlinda-back/controllers"
+    "github.com/Zephiros/amarlinda/controllers"
     "github.com/gofiber/fiber/v2"
 )
 

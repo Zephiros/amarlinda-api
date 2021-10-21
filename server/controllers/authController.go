@@ -1,8 +1,8 @@
 package controllers
 
 import (
-    "github.com/Zephiros/amarlinda-back/database"
-    "github.com/Zephiros/amarlinda-back/models"
+    "github.com/Zephiros/amarlinda/database"
+    "github.com/Zephiros/amarlinda/models"
     "github.com/gofiber/fiber/v2"
     "golang.org/x/crypto/bcrypt"
     "github.com/dgrijalva/jwt-go"

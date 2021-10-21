@@ -1,4 +1,4 @@
-module github.com/Zephiros/amarlinda-back
+module github.com/Zephiros/amarlinda
 
 go 1.17
 

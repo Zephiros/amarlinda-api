@@ -1,7 +1,7 @@
 package database
 
 import (
-    "github.com/Zephiros/amarlinda-back/models"
+    "github.com/Zephiros/amarlinda/models"
     "gorm.io/driver/mysql"
     "gorm.io/gorm"
 )
