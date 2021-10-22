@@ -3,20 +3,21 @@ package controllers
 import (
     "github.com/Zephiros/amarlinda/database"
     "github.com/Zephiros/amarlinda/models"
-    "github.com/gofiber/fiber/v2"
+    "github.com/gin-gonic/gin"
     "golang.org/x/crypto/bcrypt"
     "github.com/dgrijalva/jwt-go"
     "strconv"
     "time"
+    "net/http"
 )
 
 const SecretKey = "secret"
 
-func Register(c *fiber.Ctx) error {
+func Register(c *gin.Context) {
     var data map[string]string
 
-    if err := c.BodyParser(&data); err != nil {
-        return err
+    if err := c.ShouldBindJSON(&data); err != nil {
+       c.JSON(http.StatusBadRequest, "")
     }
 
     password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
@@ -29,14 +30,15 @@ func Register(c *fiber.Ctx) error {
 
     database.DB.Create(&user)
 
-    return c.JSON(user);
+    c.JSON(http.StatusOK, user);
 }
 
-func Login(c *fiber.Ctx) error {
+func Login(c *gin.Context) {
     var data map[string]string
 
-    if err := c.BodyParser(&data); err != nil {
-        return err
+    if err := c.ShouldBindJSON(&data); err != nil {
+       c.JSON(http.StatusBadRequest, "")
+       return
     }
 
     var user models.User
@@ -44,17 +46,13 @@ func Login(c *fiber.Ctx) error {
     database.DB.Where("email = ?", data["email"]).First(&user)
 
     if user.Id == 0 {
-        c.Status(fiber.StatusNotFound)
-        return c.JSON(fiber.Map{
-            "message": "user not found",
-        })
+        c.JSON(http.StatusNotFound, "")
+        return
     }
 
     if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-        c.Status(fiber.StatusBadRequest)
-        return c.JSON(fiber.Map{
-            "message": "incorrect password",
-        })
+        c.JSON(http.StatusBadRequest, "")
+        return
     }
 
     claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
@@ -65,53 +63,49 @@ func Login(c *fiber.Ctx) error {
     token, err := claims.SignedString([]byte(SecretKey))
 
     if err != nil {
-        c.Status(fiber.StatusInternalServerError)
-        return c.JSON(fiber.Map{
-            "message": "could not login",
-        })
+        c.JSON(http.StatusInternalServerError, nil)
+        return
     }
 
-    cookie := fiber.Cookie{
+    cookie := http.Cookie{
         Name: "jwt",
         Value: token,
-        Expires: time.Now().Add(time.Hour * 1),
-        HTTPOnly: true,
+        Expires: time.Now().Add(time.Hour),
+        HttpOnly: true,
     }
 
-    c.Cookie(&cookie)
+    http.SetCookie(c.Writer, &cookie)
 
-    return c.JSON(fiber.Map{
+    c.JSON(http.StatusOK, gin.H{
         "message": "success",
     })
 }
 
-func Logout(c *fiber.Ctx) error {
-    cookie := fiber.Cookie{
+func Logout(c *gin.Context) {
+    cookie := http.Cookie{
         Name: "jwt",
         Value: "",
         Expires: time.Now().Add(-time.Hour),
-        HTTPOnly: true,
+        HttpOnly: true,
     }
 
-    c.Cookie(&cookie)
+    http.SetCookie(c.Writer, &cookie)
 
-    return c.JSON(fiber.Map{
+    c.JSON(http.StatusOK, gin.H{
         "message": "success",
     })
 }
 
-func User(c *fiber.Ctx) error {
-    cookie := c.Cookies("jwt")
+func User(c *gin.Context) {
+    cookie, _ := c.Cookie("jwt")
 
     token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
         return []byte(SecretKey), nil
     })
 
     if err != nil {
-        c.Status(fiber.StatusUnauthorized)
-        return c.JSON(fiber.Map{
-            "message": "unauthenticated",
-        })
+        c.JSON(http.StatusUnauthorized, nil)
+        return
     }
 
     claims := token.Claims.(*jwt.StandardClaims)
@@ -120,5 +114,5 @@ func User(c *fiber.Ctx) error {
 
     database.DB.Where("id = ?", claims.Issuer).First(&user)
 
-    return c.JSON(user)
+    c.JSON(http.StatusOK, user)
 }

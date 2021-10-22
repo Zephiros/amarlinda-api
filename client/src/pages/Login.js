@@ -2,6 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import {
   Box,
   Button,
@@ -31,13 +34,31 @@ const Login = () => {
           <Formik
             initialValues={{
               email: 'login@amarlinda.com.br',
-              password: 'Password123'
+              password: 'Password123',
+              error: 'asdfsdfsd'
             }}
             validationSchema={Yup.object().shape({
               email: Yup.string().email('O e-mail precisa ser válido').max(255).required('E-mail é obrigatório'),
               password: Yup.string().max(255).required('Senha é obrigatório')
             })}
-            onSubmit={() => {
+            onSubmit={async (values) => {
+              const { email, password } = values;
+
+              const response = await fetch('http://localhost:8000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  email,
+                  password
+                })
+              });
+
+              if (response.status !== 200) {
+                const content = await response.json();
+                console.log(content.message);
+              }
+
               navigate('/app/dashboard', { replace: true });
             }}
           >
@@ -94,6 +115,32 @@ const Login = () => {
                   value={values.password}
                   variant="outlined"
                 />
+                {values.error ? (
+                  <Snackbar
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    open
+                    autoHideDuration={6000}
+                    ContentProps={{
+                      'aria-describedby': 'message-id',
+                    }}
+                    message={<span id="message-id">{values.error}</span>}
+                    action={[
+                      <Button key="undo" color="secondary" size="small">
+                        UNDO
+                      </Button>,
+                      <IconButton
+                        key="close"
+                        aria-label="Close"
+                        color="inherit"
+                      >
+                        <CloseIcon />
+                      </IconButton>,
+                    ]}
+                  />
+                ) : null}
                 <Box sx={{ py: 2 }}>
                   <Button
                     color="primary"

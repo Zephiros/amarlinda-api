@@ -3,20 +3,15 @@ package main
 import (
     "github.com/Zephiros/amarlinda/database"
     "github.com/Zephiros/amarlinda/routes"
-    "github.com/gofiber/fiber/v2"
-    "github.com/gofiber/fiber/v2/middleware/cors"
+    "fmt"
 )
 
 func main() {
     database.Connect()
 
-    app := fiber.New()
+    r := routes.SetupRouter()
 
-    app.Use(cors.New(cors.Config{
-        AllowCredentials: true,
-    }))
-
-    routes.Setup(app)
-
-    app.Listen(":3000")
+    if err := r.Run(":8000"); err != nil {
+  		  fmt.Println("startup service failed, err:%v\n", err)
+  	}
 }
