@@ -5,7 +5,7 @@ services:
       dockerfile: ./docker/go.Dockerfile
       context: .
     image: golang
-    container_name: app
+    container_name: server
     volumes:
       - .:/amarlinda
     ports:

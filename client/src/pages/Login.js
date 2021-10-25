@@ -44,7 +44,7 @@ const Login = () => {
             onSubmit={async (values) => {
               const { email, password } = values;
 
-              const response = await fetch('http://localhost:8000/api/login', {
+              const response = await fetch('http://localhost:8082/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -57,6 +57,7 @@ const Login = () => {
               if (response.status !== 200) {
                 const content = await response.json();
                 console.log(content.message);
+                return;
               }
 
               navigate('/app/dashboard', { replace: true });
