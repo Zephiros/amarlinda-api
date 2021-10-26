@@ -2,6 +2,7 @@ package routes
 
 import (
     "github.com/Zephiros/amarlinda/controllers"
+    "github.com/Zephiros/amarlinda/middleware"
     "github.com/gin-gonic/gin"
 )
 
@@ -12,8 +13,13 @@ func SetupRouter() *gin.Engine {
 
     r.POST("/api/register", controllers.Register)
     r.POST("/api/login", controllers.Login)
-    r.POST("/api/logout", controllers.Logout)
-    r.GET("/api/user", controllers.User)
+
+    r.Use(middleware.AuthorizationJWT())
+    {
+        r.POST("/api/logout", controllers.Logout)
+        r.GET("/api/user", controllers.User)
+        r.GET("/api/status", controllers.Status)
+    }
 
     return r
 }
