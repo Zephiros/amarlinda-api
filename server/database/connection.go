@@ -2,8 +2,10 @@ package database
 
 import (
     "github.com/Zephiros/amarlinda/models"
+    "github.com/Zephiros/amarlinda/pkg/seeds"
     "gorm.io/driver/mysql"
     "gorm.io/gorm"
+    "fmt"
 )
 
 var DB *gorm.DB
@@ -27,4 +29,10 @@ func Connect() {
         &models.OrderIn{},
         &models.OrderOut{},
     )
+
+    for _, seed := range seeds.All() {
+    		if err := seed.Run(connection); err != nil {
+    			   fmt.Println("Running seed '%s', failed with error: %s", seed.Name, err)
+    		}
+  	}
 }
