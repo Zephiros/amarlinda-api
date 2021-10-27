@@ -19,6 +19,12 @@ func SetupRouter() *gin.Engine {
         r.POST("/api/logout", controllers.Logout)
         r.GET("/api/user", controllers.User)
         r.GET("/api/status", controllers.Status)
+
+        r.GET("/api/products", controllers.GetProducts)
+      	r.GET("/api/products/:id", controllers.GetProduct)
+      	r.POST("/api/products", controllers.CreateProduct)
+      	r.PATCH("/api/products/:id", controllers.UpdateProduct)
+      	r.DELETE("/api/products/:id", controllers.DeleteProduct)
     }
 
     return r
