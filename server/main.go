@@ -1,17 +1,30 @@
 package main
 
 import (
-    "github.com/Zephiros/amarlinda/database"
-    "github.com/Zephiros/amarlinda/routes"
-    "fmt"
+	"fmt"
+
+	"github.com/Zephiros/amarlinda/database"
+	"github.com/Zephiros/amarlinda/docs"
+	"github.com/Zephiros/amarlinda/routes"
 )
 
+// @title API documentation
+// @version 1.0.0
+
+// @host localhost:8082
+// @BasePath /api
 func main() {
-    database.Connect()
+	docs.SwaggerInfo.Title = "Amarlinda Store Server API"
+	docs.SwaggerInfo.Description = "This is a Amarlinda API documentation."
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
-    r := routes.SetupRouter()
+	database.Connect()
 
-    if err := r.Run(); err != nil {
-  		  fmt.Println("startup service failed, err:%v\n", err)
-  	}
+	r := routes.SetupRouter()
+
+	if err := r.Run(":8082"); err != nil {
+		fmt.Println("startup service failed")
+	}
 }

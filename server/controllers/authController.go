@@ -1,118 +1,147 @@
 package controllers
 
 import (
-    "github.com/Zephiros/amarlinda/database"
-    "github.com/Zephiros/amarlinda/models"
-    "github.com/gin-gonic/gin"
-    "golang.org/x/crypto/bcrypt"
-    "github.com/dgrijalva/jwt-go"
-    "strconv"
-    "time"
-    "net/http"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/Zephiros/amarlinda/database"
+	"github.com/Zephiros/amarlinda/models"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const SecretKey = "secret"
 
+type Auth struct {
+	Email    *string `json:"email"`
+	Password *string `json:"password"`
+}
+
 func Register(c *gin.Context) {
-    var data map[string]string
+	var data map[string]string
 
-    if err := c.ShouldBindJSON(&data); err != nil {
-       c.JSON(http.StatusBadRequest, "")
-    }
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, "")
+	}
 
-    password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
+	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
 
-    user := models.User{
-      Name: data["name"],
-      Email: data["email"],
-      Password: password,
-    }
+	user := models.User{
+		Name:     data["name"],
+		Email:    data["email"],
+		Password: password,
+	}
 
-    database.DB.Create(&user)
+	database.DB.Create(&user)
 
-    c.JSON(http.StatusOK, user);
+	c.JSON(http.StatusOK, user)
 }
 
+// Login ... Login
+// @Summary Login
+// @Description Login
+// @Tags Users
+// @Accept json
+// @Param Auth body Auth true "Auth Data"
+// @Success 200 {object} object
+// @Failure 400,401,404 {object} object
+// @Router /login [post]
 func Login(c *gin.Context) {
-    var data map[string]string
+	var data map[string]string
 
-    if err := c.ShouldBindJSON(&data); err != nil {
-       c.JSON(http.StatusBadRequest, "")
-       return
-    }
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, "")
+		return
+	}
 
-    var user models.User
+	var user models.User
 
-    database.DB.Where("email = ?", data["email"]).First(&user)
+	database.DB.Where("email = ?", data["email"]).First(&user)
 
-    if user.Id == 0 {
-        c.JSON(http.StatusNotFound, "")
-        return
-    }
+	if user.Id == 0 {
+		c.JSON(http.StatusNotFound, "")
+		return
+	}
 
-    if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-        c.JSON(http.StatusBadRequest, "")
-        return
-    }
+	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
+		c.JSON(http.StatusBadRequest, "")
+		return
+	}
 
-    claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-        Issuer: strconv.Itoa(int(user.Id)),
-        ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
-    })
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    strconv.Itoa(int(user.Id)),
+		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+	})
 
-    token, err := claims.SignedString([]byte(SecretKey))
+	token, err := claims.SignedString([]byte(SecretKey))
 
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, nil)
-        return
-    }
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
 
-    cookie := http.Cookie{
-        Name: "jwt",
-        Value: token,
-        Expires: time.Now().Add(time.Hour),
-        HttpOnly: true,
-    }
+	cookie := http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour),
+		HttpOnly: true,
+	}
 
-    http.SetCookie(c.Writer, &cookie)
+	http.SetCookie(c.Writer, &cookie)
 
-    c.JSON(http.StatusOK, gin.H{
-        "message": "success",
-    })
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
 }
 
+// Logout ... Logout
+// @Summary Logout
+// @Description Logout
+// @Tags Users
+// @Success 200 {object} object
+// @Failure 400,401,404 {object} object
+// @Router /logout [post]
 func Logout(c *gin.Context) {
-    cookie := http.Cookie{
-        Name: "jwt",
-        Value: "",
-        Expires: time.Now().Add(-time.Hour),
-        HttpOnly: true,
-    }
+	cookie := http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HttpOnly: true,
+	}
 
-    http.SetCookie(c.Writer, &cookie)
+	http.SetCookie(c.Writer, &cookie)
 
-    c.JSON(http.StatusOK, gin.H{
-        "message": "success",
-    })
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
 }
 
+// User ... Get User data
+// @Summary Get user
+// @Description Get logged user data
+// @Tags Users
+// @Success 200 {object} models.User
+// @Failure 400,401,404 {object} object
+// @Router /user [get]
 func User(c *gin.Context) {
-    cookie, _ := c.Cookie("jwt")
+	cookie, _ := c.Cookie("jwt")
 
-    token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-        return []byte(SecretKey), nil
-    })
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SecretKey), nil
+	})
 
-    if err != nil {
-        c.JSON(http.StatusUnauthorized, nil)
-        return
-    }
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, nil)
+		return
+	}
 
-    claims := token.Claims.(*jwt.StandardClaims)
+	claims := token.Claims.(*jwt.StandardClaims)
 
-    var user models.User
+	var user models.User
 
-    database.DB.Where("id = ?", claims.Issuer).First(&user)
+	database.DB.Where("id = ?", claims.Issuer).First(&user)
 
-    c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, user)
 }
