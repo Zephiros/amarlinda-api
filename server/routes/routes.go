@@ -31,6 +31,11 @@ func SetupRouter() *gin.Engine {
 			products.PATCH(":id", controllers.UpdateProduct)
 			products.DELETE(":id", controllers.DeleteProduct)
 		}
+
+		payments := r.Group("/api/payments")
+		{
+			payments.GET("", controllers.GetPayments)
+		}
 	}
 
 	return r
