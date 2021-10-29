@@ -583,13 +583,57 @@ var doc = `{
                 }
             }
         },
-        "/user": {
+        "/users/profile": {
             "get": {
                 "description": "Get logged user data",
                 "tags": [
                     "Users"
                 ],
                 "summary": "Get user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update logged user data",
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "description": "User Data",
+                        "name": "User",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.UpdateUserRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -674,6 +718,21 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "responsability"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "responsability": {
                     "type": "string"
                 }
             }
@@ -766,6 +825,9 @@ var doc = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "responsability": {
                     "type": "string"
                 },
                 "updated_at": {

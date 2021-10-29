@@ -20,8 +20,13 @@ func SetupRouter() *gin.Engine {
 	{
 		r.POST("/api/register", controllers.Register)
 		r.POST("/api/logout", controllers.Logout)
-		r.GET("/api/user", controllers.User)
 		r.GET("/api/status", controllers.Status)
+
+		users := r.Group("/api/users")
+		{
+			users.GET("/profile", controllers.GetUserProfile)
+			users.PATCH("/profile", controllers.UpdateUserProfile)
+		}
 
 		products := r.Group("/api/products")
 		{

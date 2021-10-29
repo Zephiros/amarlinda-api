@@ -117,31 +117,3 @@ func Logout(c *gin.Context) {
 		"message": "success",
 	})
 }
-
-// User ... Get User data
-// @Summary Get user
-// @Description Get logged user data
-// @Tags Users
-// @Success 200 {object} models.User
-// @Failure 400,401,404 {object} object
-// @Router /user [get]
-func User(c *gin.Context) {
-	cookie, _ := c.Cookie("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(SecretKey), nil
-	})
-
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, nil)
-		return
-	}
-
-	claims := token.Claims.(*jwt.StandardClaims)
-
-	var user models.User
-
-	database.DB.Where("id = ?", claims.Issuer).First(&user)
-
-	c.JSON(http.StatusOK, user)
-}

@@ -38,6 +38,16 @@ definitions:
       password:
         type: string
     type: object
+  controllers.UpdateUserRequest:
+    properties:
+      name:
+        type: string
+      responsability:
+        type: string
+    required:
+    - name
+    - responsability
+    type: object
   models.Client:
     properties:
       created_at:
@@ -96,6 +106,8 @@ definitions:
       id:
         type: integer
       name:
+        type: string
+      responsability:
         type: string
       updated_at:
         type: string
@@ -476,7 +488,7 @@ paths:
       summary: Update a product
       tags:
       - Products
-  /user:
+  /users/profile:
     get:
       description: Get logged user data
       responses:
@@ -497,6 +509,35 @@ paths:
           schema:
             type: object
       summary: Get user
+      tags:
+      - Users
+    patch:
+      description: Update logged user data
+      parameters:
+      - description: User Data
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.UpdateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Update user
       tags:
       - Users
 swagger: "2.0"
