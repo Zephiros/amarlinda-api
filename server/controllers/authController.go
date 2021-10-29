@@ -14,7 +14,7 @@ import (
 
 const SecretKey = "secret"
 
-type Auth struct {
+type LoginRequest struct {
 	Email    *string `json:"email"`
 	Password *string `json:"password"`
 }
@@ -44,7 +44,7 @@ func Register(c *gin.Context) {
 // @Description Login
 // @Tags Users
 // @Accept json
-// @Param Auth body Auth true "Auth Data"
+// @Param login body LoginRequest true "Login Data"
 // @Success 200 {object} object
 // @Failure 400,401,404 {object} object
 // @Router /login [post]

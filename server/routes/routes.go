@@ -13,12 +13,12 @@ func SetupRouter() *gin.Engine {
 
 	r.Use(CORSMiddleware())
 
-	r.POST("/api/register", controllers.Register)
 	r.POST("/api/login", controllers.Login)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.Use(middleware.AuthorizationJWT())
 	{
+		r.POST("/api/register", controllers.Register)
 		r.POST("/api/logout", controllers.Logout)
 		r.GET("/api/user", controllers.User)
 		r.GET("/api/status", controllers.Status)
@@ -30,6 +30,15 @@ func SetupRouter() *gin.Engine {
 			products.POST("", controllers.CreateProduct)
 			products.PATCH(":id", controllers.UpdateProduct)
 			products.DELETE(":id", controllers.DeleteProduct)
+		}
+
+		clients := r.Group("/api/clients")
+		{
+			clients.GET("", controllers.GetClients)
+			clients.GET("/:id", controllers.GetClient)
+			clients.POST("", controllers.CreateClient)
+			clients.PATCH(":id", controllers.UpdateClient)
+			clients.DELETE(":id", controllers.DeleteClient)
 		}
 
 		payments := r.Group("/api/payments")

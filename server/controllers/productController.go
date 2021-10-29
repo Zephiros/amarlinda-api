@@ -1,14 +1,23 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/Zephiros/amarlinda/database"
 	"github.com/Zephiros/amarlinda/models"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
+
+type CreateAndUpdateProductRequest struct {
+	Code            string  `json:"code" binding:"required"`
+	Name            string  `json:"name" binding:"required"`
+	Description     string  `json:"description"`
+	AmountAvailable int64   `json:"amount_available"`
+	Price           float32 `json:"price"`
+	PricePromotion  float32 `json:"price_promotion"`
+	Active          bool    `json:"active"`
+	Promotion       bool    `json:"promotion"`
+}
 
 // GetProduct ... Get the product by id
 // @Summary Get product
@@ -19,18 +28,9 @@ import (
 // @Failure 400,401,404 {object} object
 // @Router /products/{id} [get]
 func GetProduct(c *gin.Context) {
-	id := c.Params.ByName("id")
-	product := models.Product{}
-	query := database.DB.Select("products.*")
-	query = query.Group("products.id")
-	err := query.Where("products.id = ?", id).First(&product).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, err.Error())
+	var product models.Product
+	if err := database.DB.Where("id = ?", c.Param("id")).First(&product).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
 
@@ -61,28 +61,18 @@ func GetProducts(c *gin.Context) {
 // @Tags Products
 // @Accept json
 // @Param id path string true "Product ID"
-// @Param Product body models.Product true "Product Data"
+// @Param Product body CreateAndUpdateProductRequest true "Product Data"
 // @Success 200 {object} object
 // @Failure 400,401,500 {object} object
 // @Router /products/{id} [patch]
 func UpdateProduct(c *gin.Context) {
-	id := c.Params.ByName("id")
-	product := models.Product{}
-	query := database.DB.Select("products.*")
-	query = query.Group("products.id")
-	err := query.Where("products.id = ?", id).First(&product).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, err.Error())
+	var product models.Product
+	if err := database.DB.Where("id = ?", c.Param("id")).First(&product).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	err = c.BindJSON(&product)
-	if err != nil {
+	if err := c.BindJSON(&product); err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -105,18 +95,10 @@ func UpdateProduct(c *gin.Context) {
 // @Failure 400,401,500 {object} object
 // @Router /products/{id} [delete]
 func DeleteProduct(c *gin.Context) {
-	id := c.Params.ByName("id")
-	product := models.Product{}
-	query := database.DB.Select("products.*")
-	query = query.Group("products.id")
-	err := query.Where("products.id = ?", id).First(&product).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, err.Error())
+	id := c.Param("id")
+	var product models.Product
+	if err := database.DB.Where("id = ?", id).First(&product).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
 
@@ -125,7 +107,7 @@ func DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, "")
 }
 
 // CreateProduct ... Create Product
@@ -133,7 +115,7 @@ func DeleteProduct(c *gin.Context) {
 // @Description Create new Product based on body parameters
 // @Tags Products
 // @Accept json
-// @Param Product body models.Product true "Product Data"
+// @Param Product body CreateAndUpdateProductRequest true "Product Data"
 // @Success 200 {object} object
 // @Failure 400,401,500 {object} object
 // @Router /products [post]

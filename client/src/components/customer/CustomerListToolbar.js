@@ -18,16 +18,16 @@ const CustomerListToolbar = (props) => (
       }}
     >
       <Button>
-        Import
+        Importar
       </Button>
       <Button sx={{ mx: 1 }}>
-        Export
+        Exportar
       </Button>
       <Button
         color="primary"
         variant="contained"
       >
-        Add customer
+        Adicionar Cliente
       </Button>
     </Box>
     <Box sx={{ mt: 3 }}>
@@ -48,7 +48,7 @@ const CustomerListToolbar = (props) => (
                   </InputAdornment>
                 )
               }}
-              placeholder="Search customer"
+              placeholder="Buscar cliente"
               variant="outlined"
             />
           </Box>
