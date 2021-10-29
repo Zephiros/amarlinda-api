@@ -1,4 +1,4 @@
-# amarlinda-back
+# amarlinda-api
 
 Entidades
 
