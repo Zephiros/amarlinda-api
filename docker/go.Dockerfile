@@ -8,4 +8,4 @@ RUN go mod download
 
 ENTRYPOINT go build && ./bin/air
 
-EXPOSE 8082
+EXPOSE ${APP_PORT}

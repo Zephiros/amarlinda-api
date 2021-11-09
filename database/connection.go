@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/Zephiros/amarlinda-api/models"
 	"github.com/Zephiros/amarlinda-api/pkg/seeds"
@@ -12,7 +13,13 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	dsn := "admin:admin@tcp(mysql:3306)/amarlinda?charset=utf8mb4&parseTime=True&loc=Local"
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USERNAME")
+	pass := os.Getenv("DB_PASSWORD")
+	name := os.Getenv("DB_NAME")
+
+	dsn := "" + user + ":" + pass + "@tcp(" + host + ":" + port + ")/" + name + "?charset=utf8mb4&parseTime=True&loc=Local"
 	connection, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {

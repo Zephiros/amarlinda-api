@@ -4,38 +4,27 @@ services:
     build:
       dockerfile: ./docker/go.Dockerfile
       context: .
-    image: golang
+    image: alexzephiros/amarlinda-api:latest
     container_name: server
     volumes:
       - .:/amarlinda
     ports:
-      - 8082:8082
+      - '${APP_PORT}:${APP_PORT}'
     networks:
       - prod
     depends_on:
       - "mysql"
-      - "redis"
-
-  redis:
-    image: redis
-    container_name: redis
-    networks:
-      - prod
-    depends_on:
-      - mysql
-    expose:
-      - '6379'
 
   mysql:
     image: mysql:8.0
     container_name: mysql
     ports:
-      - 3308:3306
+      - '${DB_PORT_INTERNAL}:${DB_PORT}'
     environment:
-      MYSQL_ROOT_PASSWORD: 'admin'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: 'admin'
-      MYSQL_DATABASE: 'amarlinda'
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_NAME}'
     volumes:
       - ./mysql:/var/lib/mysql
     volumes:

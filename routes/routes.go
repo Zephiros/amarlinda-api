@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"os"
+
 	"github.com/Zephiros/amarlinda-api/controllers"
 	"github.com/Zephiros/amarlinda-api/middleware"
 	"github.com/gin-gonic/gin"
@@ -9,26 +11,29 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
+	if os.Getenv("APP_ENV") == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
 
 	r.Use(CORSMiddleware())
 
-	r.POST("/api/login", controllers.Login)
+	r.POST("/login", controllers.Login)
+	r.POST("/register", controllers.Register)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.Use(middleware.AuthorizationJWT())
 	{
-		r.POST("/api/register", controllers.Register)
-		r.POST("/api/logout", controllers.Logout)
-		r.GET("/api/status", controllers.Status)
+		r.POST("/logout", controllers.Logout)
+		r.GET("/status", controllers.Status)
 
-		users := r.Group("/api/users")
+		users := r.Group("/users")
 		{
 			users.GET("/profile", controllers.GetUserProfile)
 			users.PATCH("/profile", controllers.UpdateUserProfile)
 		}
 
-		products := r.Group("/api/products")
+		products := r.Group("/products")
 		{
 			products.GET("", controllers.GetProducts)
 			products.GET("/:id", controllers.GetProduct)
@@ -37,7 +42,7 @@ func SetupRouter() *gin.Engine {
 			products.DELETE(":id", controllers.DeleteProduct)
 		}
 
-		clients := r.Group("/api/clients")
+		clients := r.Group("/clients")
 		{
 			clients.GET("", controllers.GetClients)
 			clients.GET("/:id", controllers.GetClient)
@@ -46,7 +51,7 @@ func SetupRouter() *gin.Engine {
 			clients.DELETE(":id", controllers.DeleteClient)
 		}
 
-		payments := r.Group("/api/payments")
+		payments := r.Group("/payments")
 		{
 			payments.GET("", controllers.GetPayments)
 		}
