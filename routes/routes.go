@@ -31,6 +31,8 @@ func SetupRouter() *gin.Engine {
 		{
 			users.GET("/profile", controllers.GetUserProfile)
 			users.PATCH("/profile", controllers.UpdateUserProfile)
+			users.PATCH("/password", controllers.UpdateUserPassword)
+			users.PATCH("/avatar", controllers.UpdateUserAvatar)
 		}
 
 		products := r.Group("/products")

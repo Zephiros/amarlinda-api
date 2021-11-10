@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Zephiros/amarlinda-api/database"
+	"github.com/Zephiros/amarlinda-api/helpers"
 	"github.com/Zephiros/amarlinda-api/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,11 @@ func Register(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest, "")
+	}
+
+	if !helpers.Validate(data["password"]) {
+		c.JSON(http.StatusBadRequest, "")
+		return
 	}
 
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
@@ -66,7 +72,7 @@ func Login(c *gin.Context) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		c.JSON(http.StatusBadRequest, "")
+		c.JSON(http.StatusUnauthorized, "")
 		return
 	}
 

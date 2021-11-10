@@ -16,5 +16,7 @@
 
 amarlinda-api
 tmp/*
+uploads/*
+!uploads/.gitkeep
 
 .env

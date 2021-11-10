@@ -583,6 +583,96 @@ var doc = `{
                 }
             }
         },
+        "/users/avatar": {
+            "patch": {
+                "description": "Update logged user avatar",
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update avatar",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "User avatar",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/password": {
+            "patch": {
+                "description": "Update logged user password",
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update password",
+                "parameters": [
+                    {
+                        "description": "User password",
+                        "name": "User",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.UpdateUserPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/users/profile": {
             "get": {
                 "description": "Get logged user data",
@@ -722,6 +812,21 @@ var doc = `{
                 }
             }
         },
+        "controllers.UpdateUserPasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm",
+                "password"
+            ],
+            "properties": {
+                "confirm": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.UpdateUserRequest": {
             "type": "object",
             "required": [
@@ -815,6 +920,9 @@ var doc = `{
         "models.User": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },

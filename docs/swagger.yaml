@@ -38,6 +38,16 @@ definitions:
       password:
         type: string
     type: object
+  controllers.UpdateUserPasswordRequest:
+    properties:
+      confirm:
+        type: string
+      password:
+        type: string
+    required:
+    - confirm
+    - password
+    type: object
   controllers.UpdateUserRequest:
     properties:
       name:
@@ -99,6 +109,8 @@ definitions:
     type: object
   models.User:
     properties:
+      avatar:
+        type: string
       created_at:
         type: string
       email:
@@ -488,6 +500,65 @@ paths:
       summary: Update a product
       tags:
       - Products
+  /users/avatar:
+    patch:
+      description: Update logged user avatar
+      parameters:
+      - description: User avatar
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Update avatar
+      tags:
+      - Users
+  /users/password:
+    patch:
+      description: Update logged user password
+      parameters:
+      - description: User password
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.UpdateUserPasswordRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Update password
+      tags:
+      - Users
   /users/profile:
     get:
       description: Get logged user data
