@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/Zephiros/amarlinda-api/database"
-	"github.com/Zephiros/amarlinda-api/docs"
 	"github.com/Zephiros/amarlinda-api/routes"
 	"github.com/joho/godotenv"
 )
@@ -20,12 +19,6 @@ func main() {
 	if err != nil {
 		fmt.Println("Error loading .env file")
 	}
-
-	docs.SwaggerInfo.Title = "Amarlinda Store API"
-	docs.SwaggerInfo.Description = "This is a Amarlinda API documentation."
-	docs.SwaggerInfo.Version = os.Getenv("APP_VERSION")
-	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	database.Connect()
 

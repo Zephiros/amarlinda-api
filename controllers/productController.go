@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Zephiros/amarlinda-api/database"
+	"github.com/Zephiros/amarlinda-api/helpers"
 	"github.com/Zephiros/amarlinda-api/models"
 	"github.com/gin-gonic/gin"
 )
@@ -45,14 +46,20 @@ func GetProduct(c *gin.Context) {
 // @Failure 401,404 {object} object
 // @Router /products [get]
 func GetProducts(c *gin.Context) {
-	products := []models.Product{}
-	query := database.DB.Select("products.*").Group("products.id")
-	if err := query.Find(&products).Error; err != nil {
+	pagination := helpers.GeneratePaginationFromRequest(c)
+	var product models.Product
+	var products []models.Product
+	offset := (pagination.Page - 1) * pagination.Limit
+	queryBuider := database.DB.Limit(pagination.Limit).Offset(offset).Order(pagination.Sort)
+
+	if err := queryBuider.Model(&models.Product{}).Where(product).Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, products)
+	pagination.Rows = products
+
+	c.JSON(http.StatusOK, pagination)
 }
 
 // UpdateProduct ... Update Product

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Zephiros/amarlinda-api/database"
+	"github.com/Zephiros/amarlinda-api/helpers"
 	"github.com/Zephiros/amarlinda-api/models"
 	"github.com/gin-gonic/gin"
 )
@@ -39,14 +40,20 @@ func GetClient(c *gin.Context) {
 // @Failure 401,404 {object} object
 // @Router /clients [get]
 func GetClients(c *gin.Context) {
-	clients := []models.Product{}
-	query := database.DB.Select("clients.*").Group("clients.id")
-	if err := query.Find(&clients).Error; err != nil {
+	pagination := helpers.GeneratePaginationFromRequest(c)
+	var client models.Client
+	var clients []models.Client
+	offset := (pagination.Page - 1) * pagination.Limit
+	queryBuider := database.DB.Limit(pagination.Limit).Offset(offset).Order(pagination.Sort)
+
+	if err := queryBuider.Model(&models.Client{}).Where(client).Find(&clients).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, clients)
+	pagination.Rows = clients
+
+	c.JSON(http.StatusOK, pagination)
 }
 
 // UpdateClient ... Update Client

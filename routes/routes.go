@@ -6,8 +6,6 @@ import (
 	"github.com/Zephiros/amarlinda-api/controllers"
 	"github.com/Zephiros/amarlinda-api/middleware"
 	"github.com/gin-gonic/gin"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func SetupRouter() *gin.Engine {
@@ -20,43 +18,18 @@ func SetupRouter() *gin.Engine {
 
 	r.POST("/login", controllers.Login)
 	r.POST("/register", controllers.Register)
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	InitSwaggerRoute(r)
 
 	r.Use(middleware.AuthorizationJWT())
 	{
 		r.POST("/logout", controllers.Logout)
 		r.GET("/status", controllers.Status)
 
-		users := r.Group("/users")
-		{
-			users.GET("/profile", controllers.GetUserProfile)
-			users.PATCH("/profile", controllers.UpdateUserProfile)
-			users.PATCH("/password", controllers.UpdateUserPassword)
-			users.PATCH("/avatar", controllers.UpdateUserAvatar)
-		}
-
-		products := r.Group("/products")
-		{
-			products.GET("", controllers.GetProducts)
-			products.GET("/:id", controllers.GetProduct)
-			products.POST("", controllers.CreateProduct)
-			products.PATCH(":id", controllers.UpdateProduct)
-			products.DELETE(":id", controllers.DeleteProduct)
-		}
-
-		clients := r.Group("/clients")
-		{
-			clients.GET("", controllers.GetClients)
-			clients.GET("/:id", controllers.GetClient)
-			clients.POST("", controllers.CreateClient)
-			clients.PATCH(":id", controllers.UpdateClient)
-			clients.DELETE(":id", controllers.DeleteClient)
-		}
-
-		payments := r.Group("/payments")
-		{
-			payments.GET("", controllers.GetPayments)
-		}
+		InitUserRoute(r)
+		InitProductRoute(r)
+		InitClientRoute(r)
+		InitPaymentRoute(r)
 	}
 
 	return r

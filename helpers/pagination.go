@@ -1,0 +1,44 @@
+package helpers
+
+import (
+	"math"
+	"strconv"
+
+	"github.com/Zephiros/amarlinda-api/database"
+	"github.com/Zephiros/amarlinda-api/models"
+	"github.com/gin-gonic/gin"
+)
+
+func GeneratePaginationFromRequest(c *gin.Context) models.Pagination {
+	var totalRows int64
+	limit := 12
+	page := 1
+	sort := "created_at asc"
+	query := c.Request.URL.Query()
+	for key, value := range query {
+		queryValue := value[len(value)-1]
+		switch key {
+		case "limit":
+			limit, _ = strconv.Atoi(queryValue)
+			break
+		case "page":
+			page, _ = strconv.Atoi(queryValue)
+			break
+		case "sort":
+			sort = queryValue
+			break
+
+		}
+	}
+
+	database.DB.Model(models.Client{}).Count(&totalRows)
+	totalPages := int(math.Ceil(float64(totalRows) / float64(limit)))
+
+	return models.Pagination{
+		Limit:      limit,
+		Page:       page,
+		Sort:       sort,
+		TotalRows:  totalRows,
+		TotalPages: totalPages,
+	}
+}
