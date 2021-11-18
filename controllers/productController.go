@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"encoding/csv"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/Zephiros/amarlinda-api/database"
 	"github.com/Zephiros/amarlinda-api/helpers"
@@ -46,7 +50,7 @@ func GetProduct(c *gin.Context) {
 // @Failure 401,404 {object} object
 // @Router /products [get]
 func GetProducts(c *gin.Context) {
-	pagination := helpers.GeneratePaginationFromRequest(c)
+	pagination := helpers.GeneratePaginationFromRequest(c, models.Product{})
 	var product models.Product
 	var products []models.Product
 	offset := (pagination.Page - 1) * pagination.Limit
@@ -139,4 +143,67 @@ func CreateProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, product)
+}
+
+// ImportProduct ... Import Products
+// @Summary Import products
+// @Description Import products data
+// @Tags Products
+// @Param file formData file true "Product data"
+// @Success 200 {object} object
+// @Failure 400,401,404 {object} object
+// @Router /products/import [post]
+func ImportProduct(c *gin.Context) {
+	file, _, err := c.Request.FormFile("file")
+	r := csv.NewReader(file)
+	r.Comma = ';'
+	records, err := r.ReadAll()
+	if err != nil {
+		fmt.Println(err)
+	}
+	for key, record := range records {
+		code := record[0]
+		name := record[1]
+		description := record[2]
+		price := record[3]
+
+		if key == 0 {
+			continue
+		}
+		if len(strings.TrimSpace(record[0])) == 0 {
+			break
+		}
+		priceFloat, err := strconv.ParseFloat(strings.Replace(strings.TrimSpace(price), "R$ ", "", -1), 32)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err)
+			return
+		}
+		var product models.Product
+		if err := database.DB.Where("code = ?", code).First(&product).Error; err != nil {
+			product := models.Product{
+				Code:            &code,
+				Name:            &name,
+				Description:     description,
+				AmountAvailable: 0,
+				Price:           float32(priceFloat),
+				PricePromotion:  0,
+				Active:          false,
+				Promotion:       false,
+			}
+			if err := database.DB.Create(&product).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
+		} else {
+			product.Name = &name
+			product.Description = description
+			product.Price = float32(priceFloat)
+			if err := database.DB.Save(&product).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, "OK")
 }

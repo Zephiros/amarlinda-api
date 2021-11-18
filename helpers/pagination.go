@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GeneratePaginationFromRequest(c *gin.Context) models.Pagination {
+func GeneratePaginationFromRequest(c *gin.Context, model interface{}) models.Pagination {
 	var totalRows int64
 	limit := 12
 	page := 1
@@ -31,7 +31,7 @@ func GeneratePaginationFromRequest(c *gin.Context) models.Pagination {
 		}
 	}
 
-	database.DB.Model(models.Client{}).Count(&totalRows)
+	database.DB.Model(model).Count(&totalRows)
 	totalPages := int(math.Ceil(float64(totalRows) / float64(limit)))
 
 	return models.Pagination{

@@ -40,7 +40,7 @@ func GetClient(c *gin.Context) {
 // @Failure 401,404 {object} object
 // @Router /clients [get]
 func GetClients(c *gin.Context) {
-	pagination := helpers.GeneratePaginationFromRequest(c)
+	pagination := helpers.GeneratePaginationFromRequest(c, models.Client{})
 	var client models.Client
 	var clients []models.Client
 	offset := (pagination.Page - 1) * pagination.Limit

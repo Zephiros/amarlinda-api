@@ -13,5 +13,6 @@ func InitProductRoute(r *gin.Engine) {
 		products.POST("", controllers.CreateProduct)
 		products.PATCH(":id", controllers.UpdateProduct)
 		products.DELETE(":id", controllers.DeleteProduct)
+		products.POST("/import", controllers.ImportProduct)
 	}
 }

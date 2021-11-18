@@ -187,5 +187,3 @@ func UpdateUserAvatar(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
-
-// @TODO GET LOGGED USER
